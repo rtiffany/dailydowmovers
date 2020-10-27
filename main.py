@@ -2,6 +2,7 @@
 
 import yfinance as yf
 import json
+date = ""
 
 class stock:
     def __init__(self,Ticker,Open,Close,Change,Pchange):
@@ -16,6 +17,7 @@ def write_json(data, filename='movers.json'):
         json.dump(data, f, indent=4)
 
 def get_stocks(filename='dow30.txt'):
+    global date
     unsortedStocks = []
     with open(filename, "r") as f:
         for l in f.readlines():
@@ -25,15 +27,16 @@ def get_stocks(filename='dow30.txt'):
                 change = t.Close - t.Open
                 pchange = change / t.Open * 100
                 unsortedStocks.append(stock(l.strip(), t.Open, t.Close, change, pchange))
+                date = t.Index
                 break
     return unsortedStocks
 
 def sort_stocks(data):
     json_obj = {}
-    json_obj['stocks'] = []
+    json_obj[str(date)] = []
     sortedStocks = sorted(data, key=lambda stock: -stock.Pchange)
     for stock in data:
-        json_obj['stocks'].append({
+        json_obj[str(date)].append({
             'rank' : data.index(stock)+1,
             'ticker' : stock.Ticker,
             'open' : stock.Open,
